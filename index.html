@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-visual">
     <title>Twitch Clips Grid</title>
     <style>
         body {
@@ -12,11 +12,15 @@
             color: #fff;
             margin: 0;
             padding: 0;
+
+            height: 100vh;
+            padding: 30px;
+        }
+
+        #container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            padding: 30px;
         }
 
         #grid-container a {
@@ -112,6 +116,8 @@
 
         .clip-card-text h3 {
             margin: 5px 0px 0px 10px;
+            max-height: 44px;
+            overflow: hidden;
         }
 
         .clip-card-text p {
@@ -143,7 +149,6 @@
     const jsonFiles = Object.keys(streamers).map(x => './data/clips-' + x + '.json')
 
     async function loadJSON(file) {
-        console.log(file);
         const response = await fetch(file);
         return response.json();
     }
@@ -237,7 +242,9 @@
 </script>
 </head>
 <body>
-    <div id="grid-container"></div>
+    <div id="container">
+        <div id="grid-container"></div>
+    </div>
 
 </body>
 </html>
