@@ -133,7 +133,7 @@
     </style>
 
 <script>
-    let streamers = {
+    let streamerMap = {
         einsebastian: "https://static-cdn.jtvnw.net/jtv_user_pictures/1def2d40-4495-4f55-812c-04978231b6f2-profile_image-70x70.png",
         ronnyberger: "https://static-cdn.jtvnw.net/jtv_user_pictures/029c4ead-9a5d-4c23-ad93-41e6b6326dbb-profile_image-70x70.png",
         daefoxi: "https://static-cdn.jtvnw.net/jtv_user_pictures/816f9be9-b34d-44d9-8d89-49b84b669201-profile_image-70x70.png",
@@ -164,7 +164,7 @@
     // Hier wählst du zufällig Clips basierend auf der durchschnittlichen Views-Logik aus
     async function getRandomClips(streamers, x) {
 
-        const selectedClips = await getAllClips();
+        const selectedClips = await getAllClips(streamers);
 
         // Hier kannst du die ersten 100 Clips auswählen (oder weniger, wenn es weniger gibt)
         const randomClips = selectedClips.sort( () => .5 - Math.random() ).slice(0, x);
@@ -214,7 +214,7 @@
                 <a href="${clip.url}" target="_blank"><img src="${clip.thumbnailUrl}" alt="${clip.title}"></a>
                 <div class="clip-card-info">
                     <div>
-                        <img src="${streamers[clip.broadcasterDisplayName.toLowerCase()]}" />
+                        <img src="${streamerMap[clip.broadcasterDisplayName.toLowerCase()]}" />
                     </div>
                     <div class="clip-card-text">
                         <h3>${clip.title}</h3>
@@ -237,7 +237,7 @@
     }
 
     // Rufe die Funktion auf, um die zufälligen Clips zu erhalten
-    getRandomClips(Object.keys(streamers), 102).then(clips => processJSONData(clips))
+    getRandomClips(Object.keys(streamerMap), 102).then(clips => processJSONData(clips))
 </script>
 </head>
 <body>
