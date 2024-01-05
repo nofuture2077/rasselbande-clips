@@ -21,6 +21,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
+        }
+
+        #player {
+            width: 800px;
+            margin-bottom: 60px;
         }
 
         #grid-container a {
@@ -204,6 +210,12 @@
     // Funktion zum Verarbeiten der CSV-Daten und Erstellen des Grids
     function processJSONData(clips) {
         var gridContainer = document.getElementById('grid-container');
+        var position = 0;
+
+        document.getElementById('player').addEventListener('ended', () => {
+            const nextPlayerUrl = clips[++position].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            document.getElementById('player').src = nextPlayerUrl;
+        }, false);
 
         for (var index = 0; index < clips.length; index++) {
             var clip = clips[index];
@@ -223,11 +235,18 @@
                     </div>
                 </div>
             `;
+
+            const playerUrl = clip.thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            
+            const clipIndex = index;
             
             var clipCardLink = document.createElement('a');
+            
             clipCardLink.href = "#";
             clipCardLink.onclick = () => {
-                document.getElementById('player').src = "${clip.embedUrl}&parent=${document.location.hostname}";
+                position = clipIndex;
+                document.getElementById('player').src = playerUrl;
+                document.getElementById('player').scrollIntoView({ behavior: "smooth", block: "start" });
                 return false;
             };
             clipCardLink.target = "_blank";
@@ -240,14 +259,16 @@
         }
     }
 
+
+
     // Rufe die Funktion auf, um die zufälligen Clips zu erhalten
     getRandomClips(Object.keys(streamerMap), 102).then(clips => processJSONData(clips))
 </script>
 </head>
 <body>
-   
+    
     <div id="container">
-        <iframe src="" id="player" height="350" width="500" allowfullscreen autoplay></iframe>
+        <video id="player" controls autoplay src="#"></video>
         <div id="grid-container"></div>
     </div>
 
