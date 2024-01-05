@@ -213,8 +213,10 @@
         var position = 0;
 
         document.getElementById('player').addEventListener('ended', () => {
-            const nextPlayerUrl = clips[++position].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            position = (position + 1 < clips.length) ? position + 1 : 0;
+            const nextPlayerUrl = clips[position].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
             document.getElementById('player').src = nextPlayerUrl;
+            return false;
         }, false);
 
         for (var index = 0; index < clips.length; index++) {
