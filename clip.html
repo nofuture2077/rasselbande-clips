@@ -228,6 +228,7 @@
             clipCardLink.href = "#";
             clipCardLink.onclick = () => {
                 document.getElementById('player').src = "${clip.embedUrl}&parent=${document.location.hostname}";
+                return false;
             };
             clipCardLink.target = "_blank";
             clipCardLink.appendChild(clipCard);
