@@ -211,7 +211,7 @@
             var clipCard = document.createElement('div');
             clipCard.classList.add('clip-card');
             clipCard.innerHTML = `
-                <a href="${clip.url}" target="_blank"><img src="${clip.thumbnailUrl}" alt="${clip.title}"></a>
+                <img src="${clip.thumbnailUrl}" alt="${clip.title}">
                 <div class="clip-card-info">
                     <div>
                         <img src="${streamerMap[clip.broadcasterDisplayName.toLowerCase()]}" />
@@ -220,13 +220,15 @@
                         <h3>${clip.title}</h3>
                         <p class="secondary">${clip.creatorDisplayName}</p>
                         <p class="secondary">${formatViewCount(clip.views) + " Views ⋅ " + formatRelativeTime(clip.creationDate)}</p>
-                        <iframe src="${clip.embedUrl}&parent=${document.location.hostname}" height="350" width="500" allowfullscreen autoplay></iframe>
                     </div>
                 </div>
             `;
             
             var clipCardLink = document.createElement('a');
-            clipCardLink.href = clip.url;
+            clipCardLink.href = "#";
+            clipCardLink.onclick = () => {
+                document.getElementById('player').src = "${clip.embedUrl}&parent=${document.location.hostname}";
+            };
             clipCardLink.target = "_blank";
             clipCardLink.appendChild(clipCard);
             
@@ -242,7 +244,9 @@
 </script>
 </head>
 <body>
+   
     <div id="container">
+        <iframe src="" id="player" height="350" width="500" allowfullscreen autoplay></iframe>
         <div id="grid-container"></div>
     </div>
 
