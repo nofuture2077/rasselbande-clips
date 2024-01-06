@@ -249,6 +249,7 @@
             clipCardLink.href = "#";
             clipCardLink.onclick = () => {
                 position = clipIndex;
+                document.getElementById('player').controls = true;
                 document.getElementById('player').src = playerUrl;
                 document.getElementById('player').scrollIntoView({ behavior: "smooth", block: "start" });
                 return false;
@@ -272,7 +273,7 @@
 <body>
     
     <div id="container">
-        <video id="player" controls autoplay src="#" poster="./img/rasselbande.jpg"></video>
+        <video id="player" autoplay src="#" poster="./img/rasselbande.jpg"></video>
         <div id="grid-container"></div>
     </div>
 
