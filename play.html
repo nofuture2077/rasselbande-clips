@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-visual">
+    <title>Rasselbanden Clips</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+
+            height: 100vh;
+            padding: 30px;
+        }
+
+        #container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #grid-container a {
+            color: inherit;
+            text-decoration: inherit;
+            display: inline-block;
+        }
+
+        .secondary {
+            color: #ccc;
+            padding: 0px 0;
+            font-size: 14px;
+        }
+
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .clip-card {
+            position: relative;
+            overflow: hidden;
+            background-color: #444;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
+        }
+
+        .clip-card:hover {
+            transform: scale(1.05);
+        }
+
+        .clip-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)); /* Adding gradient for better text visibility */
+        }
+
+        .clip-details {
+            text-align: left;
+        }
+
+        .clip-details h3 {
+            margin-top: 0;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .clip-details p {
+            margin: 5px 0;
+            color: #ddd;
+            font-size: 0.9rem;
+        }
+
+        a {
+            text-decoration: none;
+            color: #3498db;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .clip-card-info {
+            display: flex;
+            padding: 5px;
+        }
+
+        .clip-card-info img {
+            width: 48px;
+            border-radius: 24px;
+            margin: 5px;
+        }
+
+        .clip-card-text h3 {
+            margin: 5px 0px 0px 10px;
+            max-height: 44px;
+            overflow: hidden;
+        }
+
+        .clip-card-text p {
+            margin: 3px 10px;
+        }
+
+        #player {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Media query for mobile responsiveness */
+        @media screen and (max-width: 600px) {
+            .clip-card {
+                width: 100%;
+            }
+
+        }
+    </style>
+
+<script>
+    let streamerMap = {
+        einsebastian: "https://static-cdn.jtvnw.net/jtv_user_pictures/1def2d40-4495-4f55-812c-04978231b6f2-profile_image-70x70.png",
+        ronnyberger: "https://static-cdn.jtvnw.net/jtv_user_pictures/029c4ead-9a5d-4c23-ad93-41e6b6326dbb-profile_image-70x70.png",
+        daefoxi: "https://static-cdn.jtvnw.net/jtv_user_pictures/816f9be9-b34d-44d9-8d89-49b84b669201-profile_image-70x70.png",
+        zeusspezial: "https://static-cdn.jtvnw.net/jtv_user_pictures/39a738f3-ca86-4478-96ce-5a2e92ead87b-profile_image-70x70.png",
+        knirpz: "https://static-cdn.jtvnw.net/jtv_user_pictures/4fd0f679-952e-4ff4-a725-fbdb3bff574f-profile_image-70x70.png",
+        zaverytv: "https://static-cdn.jtvnw.net/jtv_user_pictures/d788dad3-2ae5-453c-9320-51fb85943d0e-profile_image-70x70.png",
+        deanauftwitch: "https://static-cdn.jtvnw.net/jtv_user_pictures/c4636546-2e9d-453e-b4c8-99f9b8882f10-profile_image-70x70.png",
+        eliaself: "https://static-cdn.jtvnw.net/jtv_user_pictures/b07a2d28-bbe4-4d70-8255-478baf36821b-profile_image-70x70.png",
+        mystery_blue: "https://static-cdn.jtvnw.net/jtv_user_pictures/93d0fa70-49e6-4bdd-b0ef-1a1d12a74116-profile_image-70x70.png",
+        tjarkson: "https://static-cdn.jtvnw.net/jtv_user_pictures/3153c382-615c-4385-9b31-f9f0f3c6683e-profile_image-70x70.png"
+    }
+
+    async function loadJSON(file) {
+        const response = await fetch(file);
+        return response.json();
+    }
+
+    async function getAllClips(streamers) {
+        const jsonFiles = streamers.map(x => './data/clips-' + x + '.json')
+        const allClips = [];
+        for (const file of jsonFiles) {
+            const clips = await loadJSON(file);
+            allClips.push(...clips.slice(0, 50));
+        }
+        return allClips;
+    }
+
+    // Hier wählst du zufällig Clips basierend auf der durchschnittlichen Views-Logik aus
+    async function getRandomClips(streamers, x) {
+
+        const selectedClips = await getAllClips(streamers);
+
+        // Hier kannst du die ersten 100 Clips auswählen (oder weniger, wenn es weniger gibt)
+        const randomClips = selectedClips.sort( () => .5 - Math.random() ).slice(0, x);
+
+        return randomClips;
+    }
+
+    function formatRelativeTime(creationDate) {
+        const now = new Date();
+        const secondsAgo = Math.floor((now - new Date(creationDate)) / 1000);
+
+        const rtf = new Intl.RelativeTimeFormat('de', { numeric: 'auto' });
+
+        if (secondsAgo < 60) {
+            return rtf.format(-secondsAgo, 'second');
+        } else if (secondsAgo < 3600) {
+            return rtf.format(-Math.floor(secondsAgo / 60), 'minute');
+        } else if (secondsAgo < 86400) {
+            return rtf.format(-Math.floor(secondsAgo / 3600), 'hour');
+        } else if (secondsAgo < 2592000) { // 30 days
+            return rtf.format(-Math.floor(secondsAgo / 86400), 'day');
+        } else {
+            return rtf.format(-Math.floor(secondsAgo / 2592000), 'month');
+        }
+    }
+
+    function formatViewCount(views) {
+        if (views >= 1e6) {
+            return (views / 1e6).toFixed(1) + 'M';
+        } else if (views >= 1e3) {
+            return (views / 1e3).toFixed(1) + 'K';
+        } else {
+            return views.toString();
+        }
+    }
+
+    // Funktion zum Verarbeiten der CSV-Daten und Erstellen des Grids
+    function processJSONData(clips) {
+        var gridContainer = document.getElementById('grid-container');
+        var position = 0;
+
+        document.getElementById('player').addEventListener('ended', () => {
+            position = (position + 1 < clips.length) ? position + 1 : 0;
+            const nextPlayerUrl = clips[position].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            document.getElementById('player').src = nextPlayerUrl;
+            return false;
+        }, false);
+
+        document.getElementById('player').src = clips[0].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+        document.getElementById('player').play();
+    }
+
+
+
+    // Rufe die Funktion auf, um die zufälligen Clips zu erhalten
+    getRandomClips(Object.keys(streamerMap), 102).then(clips => processJSONData(clips))
+</script>
+</head>
+<body>
+    
+    <div id="container">
+        <video id="player" autoplay src="#" poster="./img/rasselbande.jpg"></video>
+        <div id="grid-container"></div>
+    </div>
+
+</body>
+</html>
