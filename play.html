@@ -223,6 +223,13 @@
             return false;
         }, false);
 
+        document.getElementById('player').addEventListener('click', () => {
+            if ( document.getElementById('player').src === clips[0].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4")) {
+                document.getElementById('player').play();
+            }
+        }, false);
+
+
         document.getElementById('player').src = clips[0].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
         document.getElementById('player').play();
     }
