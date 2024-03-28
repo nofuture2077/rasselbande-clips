@@ -131,6 +131,10 @@
             max-width: 100%;
         }
 
+        #playerPreload {
+            display: none;
+        }
+
         /* Media query for mobile responsiveness */
         @media screen and (max-width: 600px) {
             .clip-card {
@@ -215,9 +219,11 @@
         var position = 0;
 
         document.getElementById('player').addEventListener('ended', () => {
-            position = (position + 1 < clips.length) ? position + 1 : 0;
+            position = (position + 1) % clips.length;
             const nextPlayerUrl = clips[position].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
             document.getElementById('player').src = nextPlayerUrl;
+
+            document.getElementById('playerPreload').src = clips[(position + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
             return false;
         }, false);
 
@@ -252,6 +258,8 @@
                 document.getElementById('player').controls = true;
                 document.getElementById('player').src = playerUrl;
                 document.getElementById('player').scrollIntoView({ behavior: "smooth", block: "start" });
+
+                document.getElementById('playerPreload').src = clips[(position + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
                 return false;
             };
             clipCardLink.target = "_blank";
@@ -262,6 +270,8 @@
             gridContainer.style.placeItems = "start";
             gridContainer.scrollIntoView({ behavior: "smooth", block: "start" });
         }
+
+        document.getElementById('playerPreload').src = clips[1].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
     }
 
 
@@ -274,6 +284,7 @@
     
     <div id="container">
         <video id="player" autoplay src="#" poster="./img/rasselbande.jpg"></video>
+        <video id="playerPreload" preload="" src="#" muted></video>
         <div id="grid-container"></div>
     </div>
 
