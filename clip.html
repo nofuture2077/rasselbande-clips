@@ -17,6 +17,11 @@
             padding: 30px;
         }
 
+        #activeClipTitle {
+            text-align: center;
+            width: 100%;
+        }
+
         #container {
             display: flex;
             justify-content: center;
@@ -142,6 +147,11 @@
             }
 
         }
+
+        .active-clip {
+            border: 2px solid #4CAF50; /* Example: A green border */
+            box-shadow: 0 0 10px #4CAF50; /* Optional: Add a shadow for more emphasis */
+        }
     </style>
 
 <script>
@@ -213,7 +223,29 @@
         }
     }
 
-    // Funktion zum Verarbeiten der CSV-Daten und Erstellen des Grids
+    function createOnClickHandler(clip, playerUrl, position, clips, clipCard) {
+        return function() {
+            // Remove active class from all clips
+            const allClips = document.querySelectorAll('.clip-card');
+            allClips.forEach(clip => {
+                clip.classList.remove('active-clip');
+            });
+
+            // Add active class to the clicked clip
+            clipCard.classList.add('active-clip');
+
+            document.getElementById('player').controls = true;
+            document.getElementById('player').src = playerUrl;
+            document.getElementById('player').scrollIntoView({ behavior: "smooth", block: "start" });
+
+            // Update the title of the active clip
+            document.getElementById('activeClipTitle').textContent = clip.title;
+
+            document.getElementById('playerPreload').src = clips[(position + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            return false;
+        };
+    }
+
     function processJSONData(clips) {
         var gridContainer = document.getElementById('grid-container');
         var position = 0;
@@ -247,41 +279,23 @@
             `;
 
             const playerUrl = clip.thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
-            
-            const clipIndex = index;
-            
             var clipCardLink = document.createElement('a');
-            
             clipCardLink.href = "#";
-            clipCardLink.onclick = () => {
-                position = clipIndex;
-                document.getElementById('player').controls = true;
-                document.getElementById('player').src = playerUrl;
-                document.getElementById('player').scrollIntoView({ behavior: "smooth", block: "start" });
 
-                document.getElementById('playerPreload').src = clips[(position + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
-                return false;
-            };
-            clipCardLink.target = "_blank";
+            // Use the createOnClickHandler function to correctly handle closures
+            clipCardLink.onclick = createOnClickHandler(clip, playerUrl, index, clips, clipCard);
+
             clipCardLink.appendChild(clipCard);
-            
             gridContainer.append(clipCardLink);
-            gridContainer.style.display = "grid";
-            gridContainer.style.placeItems = "start";
-            gridContainer.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-
-        document.getElementById('playerPreload').src = clips[1].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
     }
-
-
 
     // Rufe die Funktion auf, um die zufälligen Clips zu erhalten
     getRandomClips(Object.keys(streamerMap), 102).then(clips => processJSONData(clips))
 </script>
 </head>
 <body>
-    
+    <h2 id="activeClipTitle">Select a clip</h2>
     <div id="container">
         <video id="player" autoplay src="#" poster="./img/rasselbande.jpg"></video>
         <video id="playerPreload" preload="" src="#" muted></video>
