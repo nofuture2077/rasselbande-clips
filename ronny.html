@@ -266,9 +266,10 @@
     }
 
 
-
+    const urlParams = new URLSearchParams(window.location.search);
+    const limit = urlParams.get('limit') || 30;
     // Rufe die Funktion auf, um die zufälligen Clips zu erhalten
-    getRandomClips(Object.keys(streamerMap), 30).then(clips => processJSONData(clips))
+    getRandomClips(Object.keys(streamerMap), limit).then(clips => processJSONData(clips))
 </script>
 </head>
 <body>
