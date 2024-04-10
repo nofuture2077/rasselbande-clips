@@ -159,7 +159,7 @@
         const allClips = [];
         for (const file of jsonFiles) {
             const clips = await loadJSON(file);
-            allClips.push(...clips.slice(0, 50));
+            allClips.push(...clips);
         }
         return allClips;
     }
@@ -168,9 +168,7 @@
     async function getRandomClips(streamers, x) {
 
         const selectedClips = await getAllClips(streamers);
-
-        // Hier kannst du die ersten 100 Clips auswählen (oder weniger, wenn es weniger gibt)
-        const randomClips = selectedClips.sort( () => .5 - Math.random() ).slice(0, x);
+        const randomClips = selectedClips.slice(0, x).sort( () => .5 - Math.random() );
 
         return randomClips;
     }
