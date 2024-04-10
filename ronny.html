@@ -126,11 +126,9 @@
         }
 
         #player {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
+            width: 800px;
+            margin-bottom: 60px;
+            max-width: 100%;
         }
 
         #playerPreload {
@@ -215,26 +213,62 @@
             position = (position + 1) % clips.length;
             const nextPlayerUrl = clips[position].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
             document.getElementById('player').src = nextPlayerUrl;
+
             document.getElementById('playerPreload').src = clips[(position + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
             return false;
         }, false);
 
-        document.getElementById('player').addEventListener('click', () => {
-            if ( document.getElementById('player').src === clips[0].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4")) {
-                document.getElementById('player').play();
-            }
-        }, false);
+        for (var index = 0; index < clips.length; index++) {
+            var clip = clips[index];
 
+            var clipCard = document.createElement('div');
+            clipCard.classList.add('clip-card');
+            clipCard.innerHTML = `
+                <img src="${clip.thumbnailUrl}" alt="${clip.title}">
+                <div class="clip-card-info">
+                    <div>
+                        <img src="${streamerMap[clip.broadcasterDisplayName.toLowerCase()]}" />
+                    </div>
+                    <div class="clip-card-text">
+                        <h3>${clip.title}</h3>
+                        <p class="secondary">${clip.creatorDisplayName}</p>
+                        <p class="secondary">${formatViewCount(clip.views) + " Views ⋅ " + formatRelativeTime(clip.creationDate)}</p>
+                    </div>
+                </div>
+            `;
 
-        document.getElementById('player').src = clips[0].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            const playerUrl = clip.thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            
+            const clipIndex = index;
+            
+            var clipCardLink = document.createElement('a');
+            
+            clipCardLink.href = "#";
+            clipCardLink.onclick = () => {
+                position = clipIndex;
+                document.getElementById('player').controls = true;
+                document.getElementById('player').src = playerUrl;
+                document.getElementById('player').scrollIntoView({ behavior: "smooth", block: "start" });
+
+                document.getElementById('playerPreload').src = clips[(position + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+                return false;
+            };
+            clipCardLink.target = "_blank";
+            clipCardLink.appendChild(clipCard);
+            
+            gridContainer.append(clipCardLink);
+            gridContainer.style.display = "grid";
+            gridContainer.style.placeItems = "start";
+            gridContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
         document.getElementById('playerPreload').src = clips[1].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
-        document.getElementById('player').play();
     }
 
 
 
     // Rufe die Funktion auf, um die zufälligen Clips zu erhalten
-    getRandomClips(Object.keys(streamerMap), 102).then(clips => processJSONData(clips))
+    getRandomClips(Object.keys(streamerMap), 30).then(clips => processJSONData(clips))
 </script>
 </head>
 <body>
