@@ -14,8 +14,56 @@
             padding: 0;
 
             height: 100vh;
-            padding: 60px;
+            padding: 30px;
         }
+
+        #container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #grid-container a {
+            color: inherit;
+            text-decoration: inherit;
+            display: inline-block;
+        }
+
+        .secondary {
+            color: #ccc;
+            padding: 0px 0;
+            font-size: 14px;
+        }
+
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .clip-card {
+            position: relative;
+            overflow: hidden;
+            background-color: #444;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
+        }
+
+        .clip-card:hover {
+            transform: scale(1.05);
+        }
+
+        .clip-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px 8px 0 0;
+        }
+
         .overlay {
             position: absolute;
             top: 0;
@@ -31,15 +79,59 @@
             background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)); /* Adding gradient for better text visibility */
         }
 
+        .clip-details {
+            text-align: left;
+        }
+
+        .clip-details h3 {
+            margin-top: 0;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .clip-details p {
+            margin: 5px 0;
+            color: #ddd;
+            font-size: 0.9rem;
+        }
+
+        a {
+            text-decoration: none;
+            color: #3498db;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .clip-card-info {
+            display: flex;
+            padding: 5px;
+        }
+
+        .clip-card-info img {
+            width: 48px;
+            border-radius: 24px;
+            margin: 5px;
+        }
+
+        .clip-card-text h3 {
+            margin: 5px 0px 0px 10px;
+            max-height: 44px;
+            overflow: hidden;
+        }
+
+        .clip-card-text p {
+            margin: 3px 10px;
+        }
+
         #player {
             width: 100%;
             height: 100%;
             position: absolute;
             top: 0;
             left: 0;
-            filter: saturate(0.4);
         }
-
 
         #playerPreload {
             display: none;
@@ -51,47 +143,6 @@
                 width: 100%;
             }
 
-        }
-
-        .overlay-text {
-            position: absolute;
-            z-index: 1;
-            color: #fff;
-            text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
-            font-weight: bold;
-            padding: 10px;
-            font-size: 16px;
-
-            transform: skew(-10deg);
-            background-color: rgb(48, 255, 182, 0.8);
-            text-transform: uppercase;
-        }
-
-        .overlay-text-large {
-            font-size: 32px;
-        }
-
-        #site-title {
-            font-size: 90px;
-            left: 120px;
-            padding: 20px;
-            line-height: 80px;
-        }
-
-        #site-title-container {
-            width: 100%;
-            display: flex;
-            justify-content: start;
-        }
-
-        #clip-title {
-            left: 69px;
-            bottom: 64px;
-            max-width: 90%;
-        }
-
-        #clip-clipper {
-            bottom: 20px;         
         }
     </style>
 
@@ -163,40 +214,36 @@
         document.getElementById('player').addEventListener('ended', () => {
             position = (position + 1) % clips.length;
             const nextPlayerUrl = clips[position].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
-            document.getElementById('clip-title').innerHTML = clips[position].title;
-            document.getElementById('clip-clipper').innerHTML = clips[position].creationDate.split("T")[0] + " // " + clips[position].creatorDisplayName;
             document.getElementById('player').src = nextPlayerUrl;
             document.getElementById('playerPreload').src = clips[(position + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
             return false;
         }, false);
 
+        document.getElementById('player').addEventListener('click', () => {
+            if ( document.getElementById('player').src === clips[0].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4")) {
+                document.getElementById('player').play();
+            }
+        }, false);
+
+
         document.getElementById('player').src = clips[0].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
         document.getElementById('playerPreload').src = clips[1].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
-        document.getElementById('clip-title').innerHTML = clips[0].title;
-        document.getElementById('clip-clipper').innerHTML = clips[0].creationDate.split("T")[0] + " // " + clips[0].creatorDisplayName;
         document.getElementById('player').play();
     }
+
+
+
     // Rufe die Funktion auf, um die zufälligen Clips zu erhalten
     getRandomClips(Object.keys(streamerMap), 102).then(clips => processJSONData(clips))
 </script>
 </head>
 <body>
     
-    <video id="player" autoplay src="#" poster="./img/rasselbande.jpg"></video>
-    <video id="playerPreload" preload="" src="#" muted></video>
-
-    <div id="site-title-container">
-        <span id="site-title" class="overlay-text overlay-text-large">Gleich wieder da</span>
+    <div id="container">
+        <video id="player" autoplay src="#" poster="./img/rasselbande.jpg"></video>
+        <video id="playerPreload" preload="" src="#" muted></video>
+        <div id="grid-container"></div>
     </div>
 
-    <span id="clip-title" class="overlay-text overlay-text-large">Hey krass was da abgeht in POGGERS</span>
-    <span id="clip-clipper" class="overlay-text">NoFuture2077</span>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const text = urlParams.get('t');
-        if (text) {
-            document.getElementById('site-title').innerText = text;
-        }
-    </script>
 </body>
 </html>
