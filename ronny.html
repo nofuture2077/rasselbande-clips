@@ -160,6 +160,18 @@
         ronnyberger: "https://static-cdn.jtvnw.net/jtv_user_pictures/029c4ead-9a5d-4c23-ad93-41e6b6326dbb-profile_image-70x70.png"
     }
 
+    String.prototype.hashCode = function() {
+        var hash = 0,
+            i, chr;
+        if (this.length === 0) return hash;
+        for (i = 0; i < this.length; i++) {
+            chr = this.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+        return hash;
+    }
+
     async function loadJSON(file) {
         const response = await fetch(file);
         return response.json();
@@ -179,7 +191,7 @@
     async function getRandomClips(streamers, x) {
 
         const selectedClips = await getAllClips(streamers);
-        const randomClips = selectedClips.slice(0, x).sort( () => .5 - Math.random() );
+        const randomClips = selectedClips.slice(0, x).sort( (x, y) => x.url.hashCode() - y.url.hashCode() );
 
         return randomClips;
     }

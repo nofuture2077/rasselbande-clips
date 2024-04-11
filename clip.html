@@ -169,6 +169,18 @@
         tjarkson: "https://static-cdn.jtvnw.net/jtv_user_pictures/3153c382-615c-4385-9b31-f9f0f3c6683e-profile_image-70x70.png"
     }
 
+    String.prototype.hashCode = function() {
+        var hash = 0,
+            i, chr;
+        if (this.length === 0) return hash;
+        for (i = 0; i < this.length; i++) {
+            chr = this.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+        return hash;
+    }
+
     async function loadJSON(file) {
         const response = await fetch(file);
         return response.json();
@@ -190,7 +202,7 @@
         const selectedClips = await getAllClips(streamers);
 
         // Hier kannst du die ersten 100 Clips auswählen (oder weniger, wenn es weniger gibt)
-        const randomClips = selectedClips.sort( () => .5 - Math.random() ).slice(0, x);
+        const randomClips = selectedClips.sort( (x, y) => x.url.hashCode() - y.url.hashCode() ).slice(0, x);
 
         return randomClips;
     }
