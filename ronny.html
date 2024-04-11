@@ -155,6 +155,7 @@
     </style>
 
 <script>
+    var position = 0;
     let streamerMap = {
         ronnyberger: "https://static-cdn.jtvnw.net/jtv_user_pictures/029c4ead-9a5d-4c23-ad93-41e6b6326dbb-profile_image-70x70.png"
     }
@@ -212,8 +213,9 @@
         }
     }
 
-    function createOnClickHandler(clip, playerUrl, position, clips, clipCardLink) {
+    function createOnClickHandler(clip, playerUrl, pos, clips, clipCardLink) {
         return function() {
+            position = pos;
             // Remove active class from all clips
             const allClips = document.querySelectorAll('.clip-card');
             allClips.forEach(clip => {
@@ -230,19 +232,22 @@
             // Update the title of the active clip
             document.getElementById('activeClipTitle').textContent = clip.title;
 
-            document.getElementById('playerPreload').src = clips[(position + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            document.getElementById('playerPreload').src = clips[(pos + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
             return false;
         };
     }
 
     function processJSONData(clips) {
         var gridContainer = document.getElementById('grid-container');
-        var position = 0;
 
         document.getElementById('player').addEventListener('ended', () => {
+            document.getElementById('grid-container').children[position].children[0].classList.remove('active-clip');
             position = (position + 1) % clips.length;
             const nextPlayerUrl = clips[position].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
             document.getElementById('player').src = nextPlayerUrl;
+
+            document.getElementById('activeClipTitle').textContent = clips[position].title;
+            document.getElementById('grid-container').children[position].children[0].classList.add('active-clip');
 
             document.getElementById('playerPreload').src = clips[(position + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
             return false;
