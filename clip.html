@@ -238,7 +238,7 @@
 
             document.getElementById('player').controls = true;
             document.getElementById('player').src = playerUrl;
-            document.getElementById('player').scrollIntoView({ behavior: "smooth", block: "start" });
+            document.getElementById('activeClipTitle').scrollIntoView({ behavior: "smooth", block: "start" });
 
             // Update the title of the active clip
             document.getElementById('activeClipTitle').textContent = clip.title;
@@ -293,10 +293,21 @@
             clipCardLink.appendChild(clipCard);
             gridContainer.append(clipCardLink);
         }
+
+        document.getElementById('player').addEventListener('fullscreenchange', (event) => {
+            if (!document.fullscreenElement) {
+                document.getElementById('player').pause();
+                setTimeout(() => {
+                    document.getElementById('grid-container').children[position].scrollIntoView({ behavior: "smooth", block: "nearest" });
+                }, 1000);    
+            }
+        });
     }
 
     // Rufe die Funktion auf, um die zufälligen Clips zu erhalten
     getRandomClips(Object.keys(streamerMap), 102).then(clips => processJSONData(clips))
+
+
 </script>
 </head>
 <body>
@@ -306,6 +317,5 @@
         <video id="playerPreload" preload="" src="#" muted></video>
         <div id="grid-container"></div>
     </div>
-
 </body>
 </html>
