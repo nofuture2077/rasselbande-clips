@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-visual">
+    <title>Rasselbanden Clips</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+
+            height: 100vh;
+            padding: 30px;
+        }
+
+        #container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #grid-container a {
+            color: inherit;
+            text-decoration: inherit;
+            display: inline-block;
+        }
+
+        .secondary {
+            color: #ccc;
+            padding: 0px 0;
+            font-size: 14px;
+        }
+
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .clip-card {
+            position: relative;
+            overflow: hidden;
+            background-color: #444;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
+        }
+
+        .clip-card:hover {
+            transform: scale(1.05);
+        }
+
+        .clip-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)); /* Adding gradient for better text visibility */
+        }
+
+        .clip-details {
+            text-align: left;
+        }
+
+        .clip-details h3 {
+            margin-top: 0;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .clip-details p {
+            margin: 5px 0;
+            color: #ddd;
+            font-size: 0.9rem;
+        }
+
+        a {
+            text-decoration: none;
+            color: #3498db;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .clip-card-info {
+            display: flex;
+            padding: 5px;
+        }
+
+        .clip-card-info img {
+            width: 48px;
+            border-radius: 24px;
+            margin: 5px;
+        }
+
+        .clip-card-text h3 {
+            margin: 5px 0px 0px 10px;
+            max-height: 44px;
+            overflow: hidden;
+        }
+
+        .clip-card-text p {
+            margin: 3px 10px;
+        }
+
+        #player {
+            width: 800px;
+            margin-bottom: 60px;
+            max-width: 100%;
+        }
+
+        #playerPreload {
+            display: none;
+        }
+
+        /* Media query for mobile responsiveness */
+        @media screen and (max-width: 600px) {
+            .clip-card {
+                width: 100%;
+            }
+
+        }
+
+        #activeClipTitle {
+            text-align: center;
+            width: 100%;
+        }
+
+        .active-clip {
+            border: 2px solid #4CAF50; /* Example: A green border */
+            box-shadow: 0 0 10px #4CAF50; /* Optional: Add a shadow for more emphasis */
+        }
+    </style>
+
+<script>
+    var position = 0;
+    let streamerMap = {
+        jonsman: "https://static-cdn.jtvnw.net/jtv_user_pictures/ffe4a9cd-4a3a-4e59-87bb-2c0cf20cbf43-profile_image-70x70.png"
+    }
+
+    String.prototype.hashCode = function() {
+        var hash = 0,
+            i, chr;
+        if (this.length === 0) return hash;
+        for (i = 0; i < this.length; i++) {
+            chr = this.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+        return hash;
+    }
+
+    async function loadJSON(file) {
+        const response = await fetch(file);
+        return response.json();
+    }
+
+    async function getAllClips(streamers) {
+        const jsonFiles = streamers.map(x => './data/clips-' + x + '.json')
+        const allClips = [];
+        for (const file of jsonFiles) {
+            const clips = await loadJSON(file);
+            allClips.push(...clips);
+        }
+        return allClips;
+    }
+
+    // Hier wählst du zufällig Clips basierend auf der durchschnittlichen Views-Logik aus
+    async function getRandomClips(streamers, x) {
+
+        const selectedClips = await getAllClips(streamers);
+        const randomClips = selectedClips.slice(0, x).sort( (x, y) => x.url.hashCode() - y.url.hashCode() );
+
+        return randomClips;
+    }
+
+    function formatRelativeTime(creationDate) {
+        const now = new Date();
+        const secondsAgo = Math.floor((now - new Date(creationDate)) / 1000);
+
+        const rtf = new Intl.RelativeTimeFormat('de', { numeric: 'auto' });
+
+        if (secondsAgo < 60) {
+            return rtf.format(-secondsAgo, 'second');
+        } else if (secondsAgo < 3600) {
+            return rtf.format(-Math.floor(secondsAgo / 60), 'minute');
+        } else if (secondsAgo < 86400) {
+            return rtf.format(-Math.floor(secondsAgo / 3600), 'hour');
+        } else if (secondsAgo < 2592000) { // 30 days
+            return rtf.format(-Math.floor(secondsAgo / 86400), 'day');
+        } else {
+            return rtf.format(-Math.floor(secondsAgo / 2592000), 'month');
+        }
+    }
+
+    function formatViewCount(views) {
+        if (views >= 1e6) {
+            return (views / 1e6).toFixed(1) + 'M';
+        } else if (views >= 1e3) {
+            return (views / 1e3).toFixed(1) + 'K';
+        } else {
+            return views.toString();
+        }
+    }
+
+    function createOnClickHandler(clip, playerUrl, pos, clips, clipCardLink) {
+        return function() {
+            position = pos;
+            // Remove active class from all clips
+            const allClips = document.querySelectorAll('.clip-card');
+            allClips.forEach(clip => {
+                clip.classList.remove('active-clip');
+            });
+
+            // Add active class to the clicked clip
+            clipCardLink.querySelector('.clip-card').classList.add('active-clip');
+
+            document.getElementById('player').controls = true;
+            document.getElementById('player').src = playerUrl;
+            document.getElementById('activeClipTitle').scrollIntoView({ behavior: "smooth", block: "start" });
+
+            // Update the title of the active clip
+            document.getElementById('activeClipTitle').textContent = clip.title;
+
+            document.getElementById('playerPreload').src = clips[(pos + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            return false;
+        };
+    }
+
+    function processJSONData(clips) {
+        var gridContainer = document.getElementById('grid-container');
+
+        document.getElementById('player').addEventListener('ended', () => {
+            document.getElementById('grid-container').children[position].children[0].classList.remove('active-clip');
+            position = (position + 1) % clips.length;
+            const nextPlayerUrl = clips[position].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            document.getElementById('player').src = nextPlayerUrl;
+
+            document.getElementById('activeClipTitle').textContent = clips[position].title;
+            document.getElementById('grid-container').children[position].children[0].classList.add('active-clip');
+
+            document.getElementById('playerPreload').src = clips[(position + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            return false;
+        }, false);
+
+        for (var index = 0; index < clips.length; index++) {
+            var clip = clips[index];
+
+            var clipCard = document.createElement('div');
+            clipCard.classList.add('clip-card');
+            clipCard.innerHTML = `
+                <img src="${clip.thumbnailUrl}" alt="${clip.title}">
+                <div class="clip-card-info">
+                    <div>
+                        <img src="${streamerMap[clip.broadcasterDisplayName.toLowerCase()]}" />
+                    </div>
+                    <div class="clip-card-text">
+                        <h3>${clip.title}</h3>
+                        <p class="secondary">${clip.creatorDisplayName}</p>
+                        <p class="secondary">${formatViewCount(clip.views) + " Views ⋅ " + formatRelativeTime(clip.creationDate)}</p>
+                    </div>
+                </div>
+            `;
+
+            const playerUrl = clip.thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
+            var clipCardLink = document.createElement('a');
+            clipCardLink.href = "#";
+
+            // Use the createOnClickHandler function to correctly handle closures
+            clipCardLink.onclick = createOnClickHandler(clip, playerUrl, index, clips, clipCardLink);
+
+            clipCardLink.appendChild(clipCard);
+            gridContainer.append(clipCardLink);
+        }
+
+        document.getElementById('player').addEventListener('fullscreenchange', (event) => {
+            if (!document.fullscreenElement) {
+                document.getElementById('player').pause();
+                setTimeout(() => {
+                    document.getElementById('grid-container').children[position].scrollIntoView({ behavior: "smooth", block: "nearest" });
+                }, 1000);    
+            }
+        });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const limit = urlParams.get('limit') || 30;
+    // Rufe die Funktion auf, um die zufälligen Clips zu erhalten
+    getRandomClips(Object.keys(streamerMap), limit).then(clips => processJSONData(clips))
+</script>
+</head>
+<body>
+    
+    <h2 id="activeClipTitle">Wähle einen Clip aus</h2>
+    <div id="container">
+        <video id="player" autoplay src="#" poster="./img/rasselbande.jpg"></video>
+        <video id="playerPreload" preload="" src="#" muted></video>
+        <div id="grid-container"></div>
+    </div>
+
+</body>
+</html>
