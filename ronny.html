@@ -191,7 +191,7 @@
     async function getRandomClips(streamers, x) {
 
         const selectedClips = await getAllClips(streamers);
-        const randomClips = selectedClips.slice(0, x).sort( (x, y) => x.url.hashCode() - y.url.hashCode() );
+        const randomClips = selectedClips.slice(0, x);//.sort( (x, y) => x.url.hashCode() - y.url.hashCode() );
 
         return randomClips;
     }
