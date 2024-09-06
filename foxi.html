@@ -243,6 +243,7 @@
 
             // Update the title of the active clip
             document.getElementById('activeClipTitle').textContent = clip.title;
+            navigator.clipboard.writeText(clip.url);
 
             document.getElementById('playerPreload').src = clips[(pos + 1) % clips.length].thumbnailUrl.replaceAll("-preview-480x272.jpg", ".mp4");
             return false;
